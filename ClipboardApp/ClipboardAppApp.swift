@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct ClipboardAppApp: App {
+    @State private var manager = Manager()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(manager: manager)
+                .onAppear {
+                    NSApp.setActivationPolicy(.accessory)
+                }
         }
     }
 }
+
