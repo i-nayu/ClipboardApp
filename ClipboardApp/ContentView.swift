@@ -5,39 +5,50 @@
 //  Created by Nayu Igami on 2026/03/19.
 //
 
-import SwiftUI
-import KeyboardShortcuts
+import SwiftUI //画面作成のため
+import KeyboardShortcuts //ショートカットキー設定用ライブラリ
 
+//UI
 struct ContentView: View {
+    //データ管理
     var manager: Manager
+    
+    //コピー完了通知用フラグ
     @State private var showCopiedMessage = false
     
     var body: some View {
+        //縦に並べる（隙間なし）
         VStack(spacing: 0) {
             HStack {
                 Text("起動ショートカット:")
+                
+                //ユーザーがキーを設定可能
                 KeyboardShortcuts.Recorder(for: .toggleClipboard)
             }
             .padding()
             
                     Text("📋 Clipboard")
-                        .font(.headline)
+                        .font(.headline) //見出し
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(Color.secondary.opacity(0.1))
-
+                    
+                    //データを一覧表示
+                    //id: 文字列そのものそのものを識別子として使用
                     List(manager.history, id: \.self) { item in
+                        //横並びで
                         HStack {
                             Text(item)
                                 .lineLimit(1)
-                                .font(.system(.body, design: .monospaced))
+                                .font(.system(.body, design: .monospaced)) //等幅フォント
                             
-                            Spacer()
+                            Spacer() //左右を離す
                             
                             // このボタンを押すと「本物のクリップボード」に書き込まれる
                             Button(action: {
                                 manager.copyClipboard(text: item)
                                 
+                                //コピー完了通知を表示
                                 withAnimation {
                                     showCopiedMessage = true
                                 }
@@ -54,10 +65,12 @@ struct ContentView: View {
                             .buttonStyle(.plain) // 余計な装飾を消してアイコンだけにする
                             .help("Copy again") // マウスホバーで説明を出す
                         }
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 4) //行の余白
                     }
                 }
         .frame(minWidth: 150, minHeight: 350)
+        
+        //コピー完了通知
         if showCopiedMessage {
             Text("Copied to Clipboard!")
                 .font(.caption.bold())

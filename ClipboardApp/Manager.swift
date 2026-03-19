@@ -9,7 +9,7 @@ import SwiftUI
 import AppKit // macOS固有の機能（NSPasteboard）を使うために必要
 import KeyboardShortcuts
 
-@Observable
+@Observable //値が変わると更新
 class Manager {
     var history : [String] = [] //履歴を保存
     
@@ -22,27 +22,26 @@ class Manager {
         setupShortcuts() // ショートカットの登録をここで呼ぶ
     }
     
-    //------ショートカットの設定---------
+    //------ショートカットの設定を行う関数---------
     func setupShortcuts() {
         KeyboardShortcuts.onKeyDown(for: .toggleClipboard) { [weak self] in
             // キーが押された時の処理
-            self?.showAppWindow()
+            self?.showAppWindow() //ウィンドウを表示する関数
         }
     }
     
-    //--------ウィンドウを最前面に出す関数---------
     private var windowController: WindowController?
     
+    //--------ウィンドウを表示する関数---------
     func showAppWindow() {
+        //UIに関する操作
         DispatchQueue.main.async {
             
-            NSApp.activate(ignoringOtherApps: true)
-            
-            // 毎回新しく作る
+            //毎回新しく作成
+            NSApp.activate(ignoringOtherApps: true) //このアプリに操作権を移す
             self.windowController = WindowController(manager: self)
-            
-            self.windowController?.showWindow(nil)
-            self.windowController?.window?.makeKeyAndOrderFront(nil)
+            self.windowController?.showWindow(nil) //ディスプレイに表示（空でない場合のみ）
+            self.windowController?.window?.makeKeyAndOrderFront(nil) //いちばん手前に表示し、操作可能に
         }
     }
     
@@ -57,16 +56,17 @@ class Manager {
     
     //--------クリップボードを更新する関数-----------
     private func chaeckClipboard(){
-        let clipboard = NSPasteboard.general
+        let clipboard = NSPasteboard.general //本体のクリップボードにアクセスするため
         
         if(clipboard.changeCount != changeCount){
             changeCount = clipboard.changeCount //最新の回数を更新
             
-            //文字でコピーされたものだけを取り出す
+            //文字だけを取り出す
             if let newString = clipboard.string(forType: .string) {
                     
                 //画面を更新
                 DispatchQueue.main.async{
+                    //重複しているものは古い方を削除
                     if let index = self.history.firstIndex(of: newString){
                         self.history.remove(at: index)
                     }
@@ -87,17 +87,16 @@ class Manager {
     func copyClipboard(text: String){
         let clipboard = NSPasteboard.general
         
-        clipboard.clearContents() //一度空にする
+        clipboard.clearContents() //本物のクリップボードを空に
         clipboard.setString(text, forType: .string) //文字をセット
         
         print("Copied to system clipboard: \(text)")
         
-        // コピーしたら自分を隠す（フルスクリーン画面から退場する）
-        NSApp.hide(nil)
+        NSApp.hide(nil) //ウィンドウを消す
     }
 }
 
-// Manager.swift の一番下（ } の外側）に貼り付けてください
+//ショートカットキーの名前定義
 import KeyboardShortcuts
 
 extension KeyboardShortcuts.Name {
